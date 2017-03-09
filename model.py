@@ -69,7 +69,7 @@ class CNNModel:
     def summary(self):
         self.model.summary()
 
-    def train(self, train_generator, validation_generator, train_samples, validation_samples, learning_rate = 0.001, loss = 'mse'):
+    def train(self, train_generator, validation_generator, train_samples, validation_samples, learning_rate = 0.001, loss = 'mse', nb_epoch = 15 ):
         optimizer = Adam(lr=learning_rate)
         self.model.compile(optimizer=optimizer, loss=loss)
-        self.model.fit_generator(train_generator, samples_per_epoch= len(train_samples), validation_data = validation_generator, nb_val_samples = len(validation_samples), nb_epoch = 3)
+        self.model.fit_generator(train_generator, samples_per_epoch= len(train_samples), validation_data = validation_generator, nb_val_samples = len(validation_samples), nb_epoch = nb_epoch)

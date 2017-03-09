@@ -25,6 +25,7 @@ def main():
     with open(args.data +'/driving_log.csv') as csvfile:
         print("driving log loaded")
         reader = csv.reader(csvfile)
+        next(reader, None)  # skip the headers
         for line in reader:
             samples.append(line)
 
