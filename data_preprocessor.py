@@ -29,16 +29,16 @@ def generator(samples, batch_size=32, data_folder='./'):
             angles = []
             for batch_sample in batch_samples:
 
-                randomness = random.randint(0, 3)
+                randomness = random.randint(0, 2)
 
                 train_img = None
                 steering_angle = None
 
                 angle = float(batch_sample[3])
-                if abs(angle) < 0.1 and randomness == 0:
+                if abs(angle) < 0.01 and random.randint(0, 3) == 0:
                     continue
 
-                for index in range(0, 3):
+                for index in range(0, 2):
                     img_file = folder_path + batch_sample[index].strip()
                     image= cv2.imread(img_file)
 

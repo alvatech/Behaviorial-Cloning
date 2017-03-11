@@ -1,6 +1,19 @@
 import argparse, csv
 from model import CNNModel
 import data_preprocessor as dp
+import visualize as viz
+import numpy as np
+
+def visualize_data(samples,  train_data):
+
+    angles = []
+    for line in samples:
+        angles.append(float(line[3]))
+
+    viz.data_histogram(angles, "samples", "Angle distribution in the original data")
+
+    viz.data_histogram(train_data, "training_data", "Angle distribution in the preprocessed training data")
+
 
 def main():
     parser = argparse.ArgumentParser(description='Behavioral Cloning')
@@ -10,11 +23,10 @@ def main():
 
     # Initialize CNNModel instance
     cnn = CNNModel()
-
+    print(args.load)
     if args.load:
         model_file = args.load[0]
-        json_file = args.load[1]
-        model = cnn.load_model('model.json')
+        model = cnn.load_model(model_file)
     else:
         # Initialize a new model
         cnn.createModel()
@@ -36,6 +48,16 @@ def main():
     print("Training samples count {0} , Validation samples count {1}".format(len(train_samples), len(validation_samples)))
     train_generator = dp.generator(train_samples, batch_size=64, data_folder=args.data)
     validation_generator = dp.generator(validation_samples, batch_size=64, data_folder=args.data)
+
+    angles2 = []
+    for value in train_generator:
+        for angle in value[1]:
+            angles2.append(angle)
+        if len(angles2) >= len(train_samples):
+                break
+
+    print(len(angles2))
+    visualize_data(samples,angles2)
 
     print("Training data...")
     cnn.train(train_generator=train_generator,

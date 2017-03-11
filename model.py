@@ -5,7 +5,7 @@ Model based on NVIDIA http://images.nvidia.com/content/tegra/automotive/images/2
 from keras.models import Sequential
 from keras.layers import Dense, Cropping2D
 from keras.layers import Lambda, Convolution2D, Flatten, Dropout
-from keras.models import model_from_json
+from keras.models import load_model
 from keras.optimizers import Adam
 
 
@@ -45,31 +45,20 @@ class CNNModel:
     def get_model(self):
         return self.model
 
-
     def save_model(self, h5file = 'model.h5'):
-        # serialize model to JSON
-        model_json = self.model.to_json()
-        with open("model.json", "w") as json_file:
-            json_file.write(model_json)
-
         # serialize weights to HDF5
         self.model.save("model.h5")
         print("Saved model to disk")
 
-    def load_model(self, json_file, h5_file):
-        # load json and create model
-        json_file = open(json_file, 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        self.model = model_from_json(loaded_model_json)
-        # load weights into new model
-        self.model.load_weights(h5_file)
+    def load_model(self, h5_file):
+
+        self.model = load_model(h5_file)
         print("Loaded model from disk")
 
     def summary(self):
         self.model.summary()
 
-    def train(self, train_generator, validation_generator, train_samples, validation_samples, learning_rate = 0.001, loss = 'mse', nb_epoch = 15 ):
+    def train(self, train_generator, validation_generator, train_samples, validation_samples, learning_rate = 0.001, loss = 'mse', nb_epoch = 8 ):
         optimizer = Adam(lr=learning_rate)
         self.model.compile(optimizer=optimizer, loss=loss)
         self.model.fit_generator(train_generator, samples_per_epoch= len(train_samples), validation_data = validation_generator, nb_val_samples = len(validation_samples), nb_epoch = nb_epoch)
