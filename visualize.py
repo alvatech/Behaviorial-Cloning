@@ -71,5 +71,5 @@ def test_processing():
 
     print("Images saved")
 if __name__ == "__main__":
-    #angle_distribution()
+    angle_distribution()
     test_processing()
