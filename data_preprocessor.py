@@ -8,7 +8,7 @@ LEFT_IMAGE_INDEX = 1
 RIGHT_IMAGE_INDEX = 2
 CENTER_IMAGE_INDEX = 0
 
-
+#https://chatbotslife.com/using-augmentation-to-mimic-human-driving-496b569760a9#.11yb60izi
 def trans_image(image, steer, trans_range):
     rows, cols, ch = image.shape
     # Translation
