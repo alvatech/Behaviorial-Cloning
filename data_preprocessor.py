@@ -3,10 +3,22 @@ import numpy as np
 import random
 from sklearn.utils import shuffle
 
-CORRECTION_ANGLE = 0.25
+CORRECTION_ANGLE = 0.2
 LEFT_IMAGE_INDEX = 1
 RIGHT_IMAGE_INDEX = 2
 CENTER_IMAGE_INDEX = 0
+
+
+def trans_image(image, steer, trans_range):
+    rows, cols, ch = image.shape
+    # Translation
+    tr_x = trans_range * np.random.uniform() - trans_range / 2
+    steer_ang = steer + tr_x / trans_range * 2 * .2
+    tr_y = 0
+    Trans_M = np.float32([[1, 0, tr_x], [0, 1, tr_y]])
+    image_tr = cv2.warpAffine(image, Trans_M, (cols, rows))
+
+    return image_tr, steer_ang
 
 def crop_resize(image):
     image = image[50: 140, 20: 300]
@@ -18,7 +30,7 @@ def flip_image(image, measurement):
     measurement_flipped = -measurement
     return image_flipped, measurement_flipped
 
-def generator(samples, batch_size=32, data_folder='./'):
+def generator(samples, batch_size=32, data_folder='./', translate = True, center_image = False):
     num_samples = len(samples)
     while 1: # Loop forever so the generator never terminates
         shuffle(samples)
@@ -29,46 +41,24 @@ def generator(samples, batch_size=32, data_folder='./'):
             angles = []
             for batch_sample in batch_samples:
 
-                randomness = random.randint(0, 2)
+                image_index = random.randint(0, 2)
+                if center_image == True:
+                    image_index = CENTER_IMAGE_INDEX
 
-                train_img = None
-                steering_angle = None
+                steering_angle = float(batch_sample[3])
+                img_file = folder_path + batch_sample[image_index].strip()
+                image = cv2.imread(img_file)
 
-                angle = float(batch_sample[3])
-                if abs(angle) < 0.01 and random.randint(0, 3) == 0:
-                    continue
+                if random.randint(0, 1) == 0:
+                    image, steering_angle = flip_image(image, steering_angle)
 
-                for index in range(0, 2):
-                    img_file = folder_path + batch_sample[index].strip()
-                    image= cv2.imread(img_file)
+                train_image = crop_resize(cv2.cvtColor(image, cv2.COLOR_BGR2YUV))
 
-                    if index == CENTER_IMAGE_INDEX and randomness == CENTER_IMAGE_INDEX:
-                        if random.randint(0, 1) == 0:
-                            train_img = crop_resize(cv2.cvtColor(image, cv2.COLOR_BGR2YUV))
-                            steering_angle = angle
-                        else:
-                            image_flipped, steering_angle = flip_image(image, angle)
-                            train_img = crop_resize(cv2.cvtColor(image_flipped, cv2.COLOR_BGR2YUV))
+                if train_image is not None:
+                    if translate == True:
+                        train_image, steering_angle = trans_image(train_image, steering_angle, 100)
 
-                    if index == LEFT_IMAGE_INDEX and randomness == LEFT_IMAGE_INDEX:
-                        angle = angle + CORRECTION_ANGLE
-                        if random.randint(0, 1) == 0:
-                            train_img = crop_resize(cv2.cvtColor(image, cv2.COLOR_BGR2YUV))
-                            steering_angle = angle
-                        else:
-                            image_flipped, steering_angle = flip_image(image, angle)
-                            train_img = crop_resize(cv2.cvtColor(image_flipped, cv2.COLOR_BGR2YUV))
-
-                    if index == RIGHT_IMAGE_INDEX and randomness == RIGHT_IMAGE_INDEX:
-                        angle = angle - CORRECTION_ANGLE
-                        if random.randint(0, 1) == 0:
-                            train_img = crop_resize(cv2.cvtColor(image, cv2.COLOR_BGR2YUV))
-                            steering_angle = angle
-                        else:
-                            image_flipped, steering_angle = flip_image(image, angle)
-                            train_img = crop_resize(cv2.cvtColor(image_flipped, cv2.COLOR_BGR2YUV))
-                if train_img is not None:
-                    images.append(train_img)
+                    images.append(train_image)
                     angles.append(steering_angle)
 
             # trim image to only see section with road

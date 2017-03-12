@@ -38,7 +38,7 @@ class CNNModel:
         self.model.add(Dense(100, activation='relu'))
         self.model.add(Dropout(0.2))
         self.model.add(Dense(50, activation='relu'))
-        self.model.add(Dropout(0.1))
+        self.model.add(Dropout(0.2))
         self.model.add(Dense(10, activation='relu'))
         self.model.add(Dense(1))
 
@@ -58,7 +58,7 @@ class CNNModel:
     def summary(self):
         self.model.summary()
 
-    def train(self, train_generator, validation_generator, train_samples, validation_samples, learning_rate = 0.001, loss = 'mse', nb_epoch = 8 ):
+    def train(self, train_generator, validation_generator, train_samples, validation_samples, learning_rate = 0.0000001, loss = 'mse', nb_epoch = 2):
         optimizer = Adam(lr=learning_rate)
         self.model.compile(optimizer=optimizer, loss=loss)
         self.model.fit_generator(train_generator, samples_per_epoch= len(train_samples), validation_data = validation_generator, nb_val_samples = len(validation_samples), nb_epoch = nb_epoch)
